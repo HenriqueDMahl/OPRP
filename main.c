@@ -44,17 +44,18 @@ int main(int argc, char **argv)
 	matrix_t *A = matrix_create_block(nrows,ncols);
 	matrix_t *B = matrix_create_block(nrows,ncols);
 	matrix_t *R = matrix_create_block(nrows,ncols);
+	double *det = malloc(sizeof(double));
 
 	//TODO fix the random number gerator, it gens the same values for both matrices
-	matrix_randfill(A);
+//	matrix_randfill(A);
 	matrix_randfill(B);
 
-//	A->data[0][0] = 1;
-//	A->data[0][1] = 4;
+	A->data[0][0] = 2;
+	A->data[0][1] = 1;
 //	A->data[0][2] = 2;
 
-//	A->data[1][0] = 1;
-//	A->data[1][1] = 4;
+	A->data[1][0] = 1;
+	A->data[1][1] = 2;
 //	A->data[1][2] = 1;
 
 //	A->data[2][0] = 1;
@@ -75,7 +76,8 @@ int main(int argc, char **argv)
 		dt[i].A = A;
 		dt[i].B = B;
 		dt[i].R = R;
-		pthread_create(&threads[i], NULL, call_threaded_matrix_sum, (void *) (dt + i));
+		dt[i].det = *det;
+		pthread_create(&threads[i], NULL, call_threaded_matrix_determinant, (void *) (dt + i));
 	}
 
 	// Killing called threads for threaded matrix sum
@@ -146,6 +148,9 @@ int main(int argc, char **argv)
 */
 	printf("Matrix R\n");
 	matrix_print(R);
+	printf("\n\n");
+	printf("Determinante\n");
+	printf("%lf",det);
 
 //	int det = 0, ig = 0;
 

@@ -191,6 +191,6 @@ void* call_threaded_matrix_determinant(void *arg)
 	DadosThread *argRef = (DadosThread *) arg;
 	
 	argRef->det = threaded_matrix_determinant(argRef->A, matrix_create_block);
-
+	printf("OI %lf \n",argRef->det);
 	return NULL;
 }

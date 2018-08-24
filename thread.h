@@ -5,6 +5,7 @@
 
 typedef struct {
 	int id;
+	double det;
 	matrix_t *A;
 	matrix_t *B;
 	matrix_t *R;
@@ -24,6 +25,6 @@ matrix_t *threaded_matrix_transpose(matrix_t *A, matrix_t *R);
 
 void* call_threaded_matrix_transpose(void *arg);
 
-int threaded_matrix_determinant(matrix_t* matrix, matrix_t *(*p) (int,int));
+double threaded_matrix_determinant(matrix_t* matrix, matrix_t *(*p) (int,int));
 
 void* call_threaded_matrix_determinant(void *arg);

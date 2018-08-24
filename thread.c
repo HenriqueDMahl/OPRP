@@ -1,167 +1,51 @@
+#include "thread.h"
 #include "matrix.h"
 
-matrix_t *matrix_create_block(int rows, int cols)
+matrix_t *threaded_matrix_multiply(matrix_t *A, matrix_t *B, matrix_t *R)
 {
-	matrix_t* G = NULL;
-
-	G = malloc(sizeof(matrix_t));
-	double* bloco = malloc(sizeof(double) * rows * cols);
-	G->data = malloc(sizeof(double*) * rows);
-	G->rows = rows;
-	G->cols = cols;
-	for(int i = 0; i <= rows; i++) {
-		G->data[i] = bloco+i*cols;
-	}
-
-	return G;
-}
-
-matrix_t *matrix_create_pointers(int rows, int cols)
-{
-	matrix_t* G = NULL;
-
-	G = malloc(sizeof(matrix_t));
-	G->data = malloc(sizeof(double)*rows);
-	G->rows = rows;
-	G->cols = cols;
-
-	for(int i = 0; i <= rows; i++) {
-		G->data[i] = malloc(sizeof(double)*cols);
-	}
-	return G;
-}
-
-matrix_t *matrix_create_block_init(int rows, int cols)
-{
-	matrix_t* G = NULL;
-
-	G = calloc(1,sizeof(matrix_t));
-	double* bloco = calloc(rows*cols,sizeof(double));
-	G->data = calloc(rows,sizeof(double*));
-	G->rows = rows;
-	G->cols = cols;
-	for(int i = 0; i <= rows; i++) {
-		G->data[i] = bloco+i*cols;
-	}
-
-	return G;
-}
-
-matrix_t *matrix_create_pointers_init(int rows, int cols)
-{
-	matrix_t* G = NULL;
-
-	G = calloc(1,sizeof(matrix_t));
-	G->data = calloc(rows,sizeof(double));
-	G->rows = rows;
-	G->cols = cols;
-
-	for(int i = 0; i <= rows; i++) {
-		G->data[i] = calloc(cols,sizeof(double));
-	}
-	return G;
-}
-
-void matrix_destroy_pointers(matrix_t *m)
-{
-	for(int i = 0; i <= sizeof(m->data[0]); i++) {
-		for(int j = 0; j <= sizeof(m->data[0][0]); j++) {
-			free(&m->data[i][j]);
-		}
-	}
-	free(m->data);
-	free(m);
-}
-
-void matrix_destroy_block(matrix_t *m)
-{
-	free(m->data[0]);
-	free(m->data);
-	free(m);
-}
-
-void matrix_randfill(matrix_t *m)
-{
-	int i, j;
-    
-	for (i = 0; i < m->rows; i++) {
-		for (j = 0; j < m->cols; j++) {
-			m->data[i][j] = random();
-		}
-	}
-}
-
-void matrix_fill(matrix_t *m, double val)
-{
-	int i, j;
-
-	for (i = 0; i < m->rows; i++) {
-		for (j = 0; j < m->cols; j++) {
-			m->data[i][j] = val;
-		}
-	}
-}
-
-matrix_t *matrix_multiply(matrix_t *A, matrix_t *B, matrix_t *(*p) (int, int))
-{
-	matrix_t *G = p(A->rows,B->cols);
-
-	int s = 0;
+	double s = 0;
 	for (int i = 0; i < A->rows; i++) {
 		for (int j = 0; j < B->cols; j++) {
 			for (int k = 0; k < A->cols; k++){
 				s += A->data[i][k] * B->data[k][j];
 			}
-			G->data[i][j] = s;
+			R->data[i][j] = s;
 			s = 0;
 		}
 	}
-	return G;
+	return R;
 }
 
-void matrix_print(matrix_t *m)
+void* call_threaded_matrix_multiply(void *arg)
 {
-	int i, j;
+	DadosThread *argRef = (DadosThread *) arg;
+	
+	argRef->R = threaded_matrix_multiply(argRef->A, argRef->B, argRef->R);
 
-	for (i = 0; i < m->rows; i++) {
-		for (j = 0; j < m->cols; j++) {
-			printf("%.17f ", m->data[i][j]);
-		}
-		printf("\n");
-	}
-	fflush(stdout);
+	return NULL;
 }
 
-int matrix_equal(matrix_t*A, matrix_t *B)
+matrix_t *threaded_matrix_sum(matrix_t *A, matrix_t *B, matrix_t *R)
 {
-	int i, j;
-
-	if (A->rows != B->rows || A->cols != B->cols)
-		return 0;
-
-	for (i = 0; i < A->rows; i++) {
-		for (j = 0; j < A->cols; j++) {
-			if (A->data[i][j] != B->data[i][j])
-				return 0;
-		}
-	}
-	return 1;
-}
-
-matrix_t *matrix_sum(matrix_t *A, matrix_t *B, matrix_t *(*p) (int, int))
-{
-	matrix_t *G = p(A->rows,B->cols);
-
 	for (int i = 0; i < A->rows; i++) {
 		for (int j = 0; j < B->cols; j++) {
-			G->data[i][j] =  A->data[i][j] + B->data[i][j];
+			R->data[i][j] =  A->data[i][j] + B->data[i][j];
 		}
 	}
 
-	return G;
+	return R;
 }
 
-matrix_t *matrix_inversion(matrix_t *A, matrix_t *(*p) (int, int), void (*p2) (matrix_t*))
+void* call_threaded_matrix_sum(void *arg)
+{
+	DadosThread *argRef = (DadosThread *) arg;
+	
+	argRef->R = threaded_matrix_sum(argRef->A, argRef->B, argRef->R);
+
+	return NULL;
+}
+
+matrix_t *threaded_matrix_inversion(matrix_t *A, matrix_t *(*p) (int, int), void (*p2) (matrix_t*))
 {//Applies the Gauss-Jordan matrix reduction
 
 	matrix_t* G2 = NULL;
@@ -241,25 +125,37 @@ matrix_t *matrix_inversion(matrix_t *A, matrix_t *(*p) (int, int), void (*p2) (m
 	return G2;
 }
 
-matrix_t *matrix_transpose(matrix_t *A, matrix_t *(*p) (int, int))
+void* call_threaded_matrix_inversion(void *arg)
 {
-	matrix_t *G = p(A->rows,A->cols);
+	return NULL;
+}
 
+matrix_t *threaded_matrix_transpose(matrix_t *A, matrix_t *R)
+{
 	for (int i = 0; i < A->rows; i++) {
 		for (int j = 0; j < A->cols; j++) {
-			G->data[i][j] =  A->data[j][i];
+			R->data[i][j] =  A->data[j][i];
 		}
 	}
 
-	return G;
+	return R;
 }
 
-int matrix_determinant(matrix_t* matrix, matrix_t *(*p) (int,int))
+void* call_threaded_matrix_transpose(void *arg)
+{
+	DadosThread *argRef = (DadosThread *) arg;
+	
+	argRef->R = threaded_matrix_transpose(argRef->A, argRef->R);
+
+	return NULL;
+}
+
+double threaded_matrix_determinant(matrix_t* matrix, matrix_t *(*p) (int,int))
 {
 	if(matrix->rows == 1){//aims to find the 1x1 matrix case
 		return matrix->data[0][0];
 	} else{
-		int det = 0;
+		double det = 0;
 		int i, row, col, j_aux, i_aux;
 
 		//Chooses first line to calc cofactors
@@ -288,4 +184,13 @@ int matrix_determinant(matrix_t* matrix, matrix_t *(*p) (int,int))
 		}
 		return det;
 	}
+}
+
+void* call_threaded_matrix_determinant(void *arg)
+{
+	DadosThread *argRef = (DadosThread *) arg;
+	
+	argRef->det = threaded_matrix_determinant(argRef->A, matrix_create_block);
+
+	return NULL;
 }

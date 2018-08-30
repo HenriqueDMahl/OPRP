@@ -100,9 +100,9 @@ int main(int argc, char **argv)
 		matrix_t *Rt = (ncols1 == nrows1)? matrix_create_block(nrows1,ncols1) : matrix_create_block(ncols1,nrows1); freeLaterRt = 1;
 
 		// Fill randomically the matrices
-		matrix_randfill(A);
-		matrix_randfill(B);
-/*
+	//	matrix_randfill(A);
+	//	matrix_randfill(B);
+
 		   A->data[0][0] = 2;
 		   A->data[0][1] = 1;
 		   A->data[0][2] = 2;
@@ -125,7 +125,7 @@ int main(int argc, char **argv)
 
 	 		   B->data[2][0] = 1;
 	 		   B->data[2][1] = 9;
-	 		   B->data[2][2] = 2;*/
+	 		   B->data[2][2] = 2;
 
 		if(mode2Debug)
 		{
@@ -269,7 +269,7 @@ int main(int argc, char **argv)
 				dt[i].lastThread     = nthreads-1;
 				dt[i].flagRows       = flagRows;
 				dt[i].debug          = mode2Debug;
-				dt[i].resto					 = resto;
+				dt[i].resto			 = resto;
 				dt[i].A              = A;
 				dt[i].Rt             = Rt;
 				dt[i].det            = 0;
@@ -318,6 +318,7 @@ int main(int argc, char **argv)
 		if(calcEqu && A->rows == B->rows && A->cols == A->rows)
 		{//Threaded matrix equality
 			// Starting threads for threaded matrix equality
+			equal = 1;
 			int dataBlock_rows = A->rows/nthreads;
 			int flagRows = 0;
 
@@ -334,11 +335,11 @@ int main(int argc, char **argv)
 				dt[i].lastThread     = nthreads-1;
 				dt[i].flagRows       = flagRows;
 				dt[i].debug          = mode2Debug;
-				dt[i].resto					 = resto;
+				dt[i].resto			 = resto;
 				dt[i].A              = A;
 				dt[i].B              = B;
 				dt[i].R              = R;
-				dt[i].equal 				 = &equal;
+				dt[i].equal 		 = &equal;
 				dt[i].det            = 0;
 				//TODO implement a synchronization point between threads???
 				pthread_create(&threads[i], NULL, threaded_matrix_equal, (void *) (dt + i));

@@ -10,9 +10,9 @@ void* threaded_matrix_multiply(void *arg)
 
 	if(argRef->id == argRef->lastThread){
 		if(argRef->flagRows) {
-			newPos = (argRef->id*argRef->dataBlock_rows)+argRef->dataBlock_rows + argRef->resto; // INDICA QUE O NUMERO DE THREADS É IMPAR
+			newPos = (argRef->id*argRef->dataBlock_rows)+argRef->dataBlock_rows + argRef->resto; // INDICA QUE O NUMERO DE THREADS C	 IMPAR
 		}else{
-			newPos = (argRef->id*argRef->dataBlock_rows)+argRef->dataBlock_rows; // INDICA QUE O NUMERO DE THREADS É PAR
+			newPos = (argRef->id*argRef->dataBlock_rows)+argRef->dataBlock_rows; // INDICA QUE O NUMERO DE THREADS C	 PAR
 		}
 	}else{
 		newPos = (argRef->id*argRef->dataBlock_rows)+argRef->dataBlock_rows;
@@ -46,9 +46,9 @@ void* threaded_matrix_sum(void *arg)
 
 	if(argRef->id == argRef->lastThread){
 		if(argRef->flagRows) {
-			newPos = (argRef->id*argRef->dataBlock_rows)+argRef->dataBlock_rows + argRef->resto; // INDICA QUE O NUMERO DE THREADS É IMPAR
+			newPos = (argRef->id*argRef->dataBlock_rows)+argRef->dataBlock_rows + argRef->resto; // INDICA QUE O NUMERO DE THREADS C	 IMPAR
 		}else{
-			newPos = (argRef->id*argRef->dataBlock_rows)+argRef->dataBlock_rows; // INDICA QUE O NUMERO DE THREADS É PAR
+			newPos = (argRef->id*argRef->dataBlock_rows)+argRef->dataBlock_rows; // INDICA QUE O NUMERO DE THREADS C	 PAR
 		}
 	}else{
 		newPos = (argRef->id*argRef->dataBlock_rows)+argRef->dataBlock_rows;
@@ -167,9 +167,9 @@ void* threaded_matrix_transpose(void *arg)
 
 	if(argRef->id == argRef->lastThread){
 		if(argRef->flagRows) {
-			newPos = (argRef->id*argRef->dataBlock_rows)+argRef->dataBlock_rows + argRef->resto; // INDICA QUE O NUMERO DE THREADS É IMPAR
+			newPos = (argRef->id*argRef->dataBlock_rows)+argRef->dataBlock_rows + argRef->resto; // INDICA QUE O NUMERO DE THREADS C	 IMPAR
 		}else{
-			newPos = (argRef->id*argRef->dataBlock_rows)+argRef->dataBlock_rows; // INDICA QUE O NUMERO DE THREADS É PAR
+			newPos = (argRef->id*argRef->dataBlock_rows)+argRef->dataBlock_rows; // INDICA QUE O NUMERO DE THREADS C	 PAR
 		}
 	}else{
 		newPos = (argRef->id*argRef->dataBlock_rows)+argRef->dataBlock_rows;
@@ -256,9 +256,9 @@ void* threaded_matrix_equal(void *arg)
 
 		if(argRef->id == argRef->lastThread){
 			if(argRef->flagRows) {
-				newPos = (argRef->id*argRef->dataBlock_rows)+argRef->dataBlock_rows + argRef->resto; // INDICA QUE O NUMERO DE THREADS É IMPAR
+				newPos = (argRef->id*argRef->dataBlock_rows)+argRef->dataBlock_rows + argRef->resto; // INDICA QUE O NUMERO DE THREADS C	 IMPAR
 			}else{
-				newPos = (argRef->id*argRef->dataBlock_rows)+argRef->dataBlock_rows; // INDICA QUE O NUMERO DE THREADS É PAR
+				newPos = (argRef->id*argRef->dataBlock_rows)+argRef->dataBlock_rows; // INDICA QUE O NUMERO DE THREADS C	 PAR
 			}
 		}else{
 			newPos = (argRef->id*argRef->dataBlock_rows)+argRef->dataBlock_rows;
@@ -268,16 +268,19 @@ void* threaded_matrix_equal(void *arg)
 	{
 		for (int j = 0; j < argRef->A->cols; j++)
 		{
+		    if(*argRef->equal == 0) break; //Verifica se alguma thread já marcou o equal = 0, se sim cai fora
 			if (argRef->A->data[i][j] != argRef->B->data[i][j])
 			{
 				if(argRef->debug) printf("ID:%d 0 ",argRef->id);
 				*(argRef->equal) = 0;
 				break;
+			}else{
+				if(argRef->debug) printf("ID:%d 1 ",argRef->id);
+	            *(argRef->equal) = 1;
 			}
 		}
 		if(argRef->debug) printf("\n");
 	}
-	*(argRef->equal) = 1;
 
 	pthread_exit(NULL);
 }

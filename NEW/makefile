@@ -4,12 +4,12 @@ TARGET=main
 OTHER_TARGETS=matrix
 
 # Matrix A dimensions
-Arows=2
-Acols=2
+Arows=3
+Acols=3
 
 # Matrix B dimensions-pthread
-Brows=2
-Bcols=2
+Brows=3
+Bcols=3
 
 # Active threads
 nThreads=2
@@ -25,12 +25,13 @@ Mode=0
 Mode2Debug=1
 
 # Function execution control
-M_Summm=1
+# Select only one at a time
+M_Summm=0
 M_Multi=0
 M_Inver=0
 M_Trasp=0
 M_Deter=0
-M_Equal=0
+M_Equal=1
 
 all:
 	@$(clean) clear;

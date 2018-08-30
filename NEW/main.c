@@ -45,20 +45,20 @@ int main(int argc, char **argv)
 		printf("Max number of threads supported is 8, your value was changed\n");
 		nthreads = MaxThread;
 	}else if(nthreads > nrows1)
-	{
-		nthreads = nrows1;
-	}else if(mthreads > ncols1)
-	{
-	 nthreads = ncols1;
+	{// Prevents nthreads being higher than A matrix row
+			nthreads = nrows1;
+	}else if(nthreads > nrows2)
+	{// Prevents nthreads being higher than B matrix row
+		nthreads = nrows2;
 	}
 
-	if (!(dt = (DadosThread *) malloc(sizeof(DadosThread) * nthreads)))
+	if(!(dt = (DadosThread *) malloc(sizeof(DadosThread) * nthreads)))
 	{
 		printf("Failed to allocate memory\n");
 		exit(EXIT_FAILURE);
 	}
 
-	if (!(threads = (pthread_t *) malloc(sizeof(pthread_t) * nthreads)))
+	if(!(threads = (pthread_t *) malloc(sizeof(pthread_t) * nthreads)))
 	{
 		printf("Failed to allocate memory\n");
 		exit(EXIT_FAILURE);
@@ -102,7 +102,7 @@ int main(int argc, char **argv)
 		// Fill randomically the matrices
 		matrix_randfill(A);
 		matrix_randfill(B);
-		/*
+/*
 		   A->data[0][0] = 2;
 		   A->data[0][1] = 1;
 		   A->data[0][2] = 2;
@@ -114,14 +114,30 @@ int main(int argc, char **argv)
 		   A->data[2][0] = 1;
 		   A->data[2][1] = 9;
 		   A->data[2][2] = 2;
-		*/
-		printf("Matrix A\n");
-		matrix_print(A);
 
-		printf("\nMatrix B\n");
-		matrix_print(B);
-		printf("\n");
+	 		   B->data[0][0] = 2;
+	 		   B->data[0][1] = 1;
+	 		   B->data[0][2] = 2;
 
+	 		   B->data[1][0] = 1;
+	 		   B->data[1][1] = 2;
+	 		   B->data[1][2] = 1;
+
+	 		   B->data[2][0] = 1;
+	 		   B->data[2][1] = 9;
+	 		   B->data[2][2] = 2;*/
+
+		if(mode2Debug)
+		{
+			printf("Matrix A\n");
+			matrix_print(A);
+
+			printf("\nMatrix B\n");
+			matrix_print(B);
+			printf("\n");
+
+			printf("Thread number = %d\n", nthreads);
+		}
 		// Threadned function execution control
 		if(calcSum)
 		{//Threaded matrix sum
@@ -131,24 +147,27 @@ int main(int argc, char **argv)
 				int dataBlock_rows = A->rows/nthreads;
 				int flagRows = 0;
 
-				if(A->rows % nthreads){
+				int resto = A->rows % nthreads;
+
+				if(resto){
 					flagRows = 1;
 				}
 
 				// Starting threads for threaded matrix sum
 				for (int i = 0; i < nthreads; i++)
 				{
-					dt[i].id    = i;
+					dt[i].id             = i;
 					dt[i].dataBlock_rows = dataBlock_rows;
-					dt[i].lastThread = nthreads-1;
-					dt[i].flagRows = flagRows;
-					dt[i].debug = mode2Debug;
-					dt[i].A     = A;
-					dt[i].B     = B;
-					dt[i].R     = R;
-					dt[i].det   = 0;
+					dt[i].lastThread     = nthreads-1;
+					dt[i].flagRows       = flagRows;
+					dt[i].debug          = mode2Debug;
+					dt[i].resto					 = resto;
+					dt[i].A              = A;
+					dt[i].B              = B;
+					dt[i].R              = R;
+					dt[i].det            = 0;
 
-					pthread_create(&threads[i], NULL, call_threaded_matrix_sum, (void *) (dt + i));
+					pthread_create(&threads[i], NULL, threaded_matrix_sum, (void *) (dt + i));
 				}
 
 				// Killing called threads for threaded matrix sum
@@ -167,16 +186,28 @@ int main(int argc, char **argv)
 		if(calcMul)
 		{//Threaded matrix multiplication
 			// Starting threads for threaded matrix multiplication
+			int dataBlock_rows = A->rows/nthreads;
+			int flagRows = 0;
+
+			int resto = A->rows % nthreads;
+
+			if(resto){
+				flagRows = 1;
+			}
 			for (int i = 0; i < nthreads; i++)
 			{
-				dt[i].id    = i;
-				dt[i].A     = A;
-				dt[i].B     = B;
-				dt[i].R     = R;
-				dt[i].det   = 0;
-				dt[i].debug = mode2Debug;
+				dt[i].id             = i;
+				dt[i].dataBlock_rows = dataBlock_rows;
+				dt[i].lastThread     = nthreads-1;
+				dt[i].flagRows       = flagRows;
+				dt[i].debug          = mode2Debug;
+				dt[i].resto					 = resto;
+				dt[i].A              = A;
+				dt[i].B              = B;
+				dt[i].R              = R;
+				dt[i].det            = 0;
 				//TODO how to check what each thread is doing to verify whether its working or not?
-				pthread_create(&threads[i], NULL, call_threaded_matrix_multiply, (void *) (dt + i));
+				pthread_create(&threads[i], NULL, threaded_matrix_multiply, (void *) (dt + i));
 			}
 
 			// Killing called threads for threaded matrix sum
@@ -201,8 +232,10 @@ int main(int argc, char **argv)
 				dt[i].B     = B;
 				dt[i].R     = R;
 				dt[i].debug = mode2Debug;
+				dt[i].p     = &matrix_create_block;
+				dt[i].p2    = &matrix_destroy_block;
 				//TODO implement it (depends upon determinant)
-				pthread_create(&threads[i], NULL, call_threaded_matrix_inversion, (void *) (dt + i));
+				pthread_create(&threads[i], NULL, threaded_matrix_inversion, (void *) (dt + i));
 			}
 
 			// Killing called threads for threaded matrix inversion
@@ -220,16 +253,28 @@ int main(int argc, char **argv)
 		if(calcTra)
 		{//Threaded matrix transpose
 			// Starting threads for threaded matrix transpose
+			int dataBlock_rows = A->rows/nthreads;
+			int flagRows = 0;
+
+			int resto = A->rows % nthreads;
+
+			if(resto){
+				flagRows = 1;
+			}
+
 			for (int i = 0; i < nthreads; i++)
 			{
-				dt[i].id    = i;
-				dt[i].A     = A;
-				dt[i].B     = NULL;
-				dt[i].R     = NULL;
-				dt[i].Rt    = Rt;
-				dt[i].debug = mode2Debug;
+				dt[i].id             = i;
+				dt[i].dataBlock_rows = dataBlock_rows;
+				dt[i].lastThread     = nthreads-1;
+				dt[i].flagRows       = flagRows;
+				dt[i].debug          = mode2Debug;
+				dt[i].resto					 = resto;
+				dt[i].A              = A;
+				dt[i].Rt             = Rt;
+				dt[i].det            = 0;
 				//TODO correct transpose matrix calc for non-symmetric matrix
-				pthread_create(&threads[i], NULL, call_threaded_matrix_transpose, (void *) (dt + i));
+				pthread_create(&threads[i], NULL, threaded_matrix_transpose, (void *) (dt + i));
 			}
 
 			// Killing called threads for threaded matrix transpose
@@ -270,19 +315,33 @@ int main(int argc, char **argv)
 			printf("\nDeterminant result: %lf\n", det);
 		}
 
-		if(calcEqu)
+		if(calcEqu && A->rows == B->rows && A->cols == A->rows)
 		{//Threaded matrix equality
 			// Starting threads for threaded matrix equality
+			int dataBlock_rows = A->rows/nthreads;
+			int flagRows = 0;
+
+			int resto = A->rows % nthreads;
+
+			if(resto){
+				flagRows = 1;
+			}
+
 			for (int i = 0; i < nthreads; i++)
 			{
-				dt[i].id    = i;
-				dt[i].A     = A;
-				dt[i].B     = B;
-				dt[i].R     = R;
-				dt[i].equal = &equal;
-				dt[i].debug = mode2Debug;
+				dt[i].id             = i;
+				dt[i].dataBlock_rows = dataBlock_rows;
+				dt[i].lastThread     = nthreads-1;
+				dt[i].flagRows       = flagRows;
+				dt[i].debug          = mode2Debug;
+				dt[i].resto					 = resto;
+				dt[i].A              = A;
+				dt[i].B              = B;
+				dt[i].R              = R;
+				dt[i].equal 				 = &equal;
+				dt[i].det            = 0;
 				//TODO implement a synchronization point between threads???
-				pthread_create(&threads[i], NULL, call_threaded_matrix_equal, (void *) (dt + i));
+				pthread_create(&threads[i], NULL, threaded_matrix_equal, (void *) (dt + i));
 			}
 
 			// Killing called threads for threaded matrix equality
@@ -294,6 +353,8 @@ int main(int argc, char **argv)
 			free(threads);
 
 			(equal)? printf("\nMatrices are equal\n") : printf("\nMatrices are not equal\n");
+		}else{
+			printf("\nMatrices (rows/cols) are not equal\n");
 		}
 
 		// Free used matrices
@@ -309,7 +370,7 @@ int main(int argc, char **argv)
 
 	if(execSeq)
 	{
-		if(execThr)
+		if(execThr && mode2Debug)
 			printf("_____________________________________________\n");
 
 		/* Sequential matrix functions */
@@ -337,7 +398,7 @@ int main(int argc, char **argv)
 		   A->data[2][0] = 1;
 		   A->data[2][1] = 9;
 		   A->data[2][2] = 2;
-		*/
+		   */
 		if(!execThr)
 		{
 			printf("Matrix A\n");

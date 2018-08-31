@@ -207,7 +207,7 @@ void* threaded_matrix_equal(void *arg)
 	{
 		for (int j = 0; j < argRef->A->cols; j++)
 		{
-			if(*argRef->equal == 0) break;// Ensures that if a thread already marked it as different then it won't go any further processing for others
+			if(*argRef->equal == 0) pthread_exit(NULL);// Ensures that if a thread already marked it as different then it won't go any further processing for others
 			if (argRef->A->data[i][j] != argRef->B->data[i][j])
 			{
 				if(argRef->debug) printf("ID:%d 0 ",argRef->id);

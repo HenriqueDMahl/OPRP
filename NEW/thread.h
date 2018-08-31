@@ -12,9 +12,13 @@ typedef struct {
 	int *equal;
 	int resto;
 	double* det;
+	double* detU;
+	double* detL;
 	matrix_t *A;
 	matrix_t *B;
 	matrix_t *R;
+	matrix_t *L;
+	matrix_t *U;
 	matrix_t *Rt;
 	matrix_t *(*p) (int,int);
 	void (*p2) (matrix_t*);
@@ -28,8 +32,6 @@ void* threaded_matrix_inversion(void *arg);
 
 void* threaded_matrix_transpose(void *arg);
 
-double threaded_matrix_determinant(matrix_t* matrix, matrix_t *(*p) (int,int), int debug);
-
-void* call_threaded_matrix_determinant(void *arg);
+void* threaded_matrix_determinant(void *arg);
 
 void* threaded_matrix_equal(void *arg);

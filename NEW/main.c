@@ -94,28 +94,38 @@ int main(int argc, char **argv)
 		// Matrices initialization
 		matrix_t *A = matrix_create_block(nrows1,ncols1); freeLaterA = 1;
 		matrix_t *B = matrix_create_block(nrows2,ncols2); freeLaterB = 1;
+		matrix_t *L = matrix_create_block(nrows1,ncols1);
+		matrix_t *U = matrix_create_block(nrows1,ncols1);
 		// If A and B are multiplicative then R shall support its result
 		matrix_t *R =  (ncols1 == nrows2)? matrix_create_block(nrows1,ncols2) : matrix_create_block(nrows1,ncols1); freeLaterR = 1;
 		// If A has nrows != ncols then
 		matrix_t *Rt = (ncols1 == nrows1)? matrix_create_block(nrows1,ncols1) : matrix_create_block(ncols1,nrows1); freeLaterRt = 1;
 
 		// Fill randomically the matrices
-		matrix_randfill(A);
-		matrix_randfill(B);
+	//	matrix_randfill(A);
+	//	matrix_randfill(B);
 
+
+		A->data[0][0] = 1;
+        A->data[0][1] = 2;
+        A->data[0][2] = 2;
+        A->data[0][3] = 2;
+        
+        A->data[1][0] = 1;
+        A->data[1][1] = 4;
+        A->data[1][2] = 1;
+        A->data[1][3] = 2;
+        
+        A->data[2][0] = 1;
+        A->data[2][1] = 4;
+        A->data[2][2] = 5;
+        A->data[2][3] = 1;
+        
+        A->data[3][0] = 2;
+        A->data[3][1] = 3;
+        A->data[3][2] = 4;
+        A->data[3][3] = 5;
 /*
-		A->data[0][0] = 2;
-		A->data[0][1] = 1;
-		A->data[0][2] = 2;
-
-		A->data[1][0] = 1;
-		A->data[1][1] = 2;
-		A->data[1][2] = 1;
-
-		A->data[2][0] = 1;
-		A->data[2][1] = 9;
-		A->data[2][2] = 2;
-
 		B->data[0][0] = 2;
 		B->data[0][1] = 1;
 		B->data[0][2] = 2;
@@ -126,8 +136,8 @@ int main(int argc, char **argv)
 
 		B->data[2][0] = 1;
 		B->data[2][1] = 9;
-		B->data[2][2] = 2;
-*/
+		B->data[2][2] = 2;*/
+
 
 		if(mode2Debug)
 		{
@@ -292,26 +302,57 @@ int main(int argc, char **argv)
 		if(calcDet)
 		{//Threaded matrix determinant
 			// Starting threads for threaded matrix determinant
+			int dataBlock_rows = A->rows/nthreads;
+			int flagRows = 0;
+
+			int resto = A->rows % nthreads;
+
+			if(resto){
+				flagRows = 1;
+			}
+			
+			double detU = 1;
+			double detL = 1;
+			det = 0;
+			
 			for (int i = 0; i < nthreads; i++)
 			{
-				dt[i].id    = i;
-				dt[i].A     = A;
-				dt[i].B     = B;
-				dt[i].R     = R;
-				dt[i].det   = &det;
-				dt[i].debug = mode2Debug;
+				dt[i].id             = i;
+				dt[i].A              = A;
+				dt[i].L              = L;
+				dt[i].U              = U;
+				dt[i].dataBlock_rows = dataBlock_rows;
+				dt[i].lastThread     = nthreads-1;
+				dt[i].flagRows       = flagRows;
+				dt[i].resto          = resto;
+				dt[i].det            = &det;
+				dt[i].detU           = &detU;
+				dt[i].detL           = &detL;
+				dt[i].debug          = mode2Debug;
 				//TODO how to implement the split of chunks to the threads
-				pthread_create(&threads[i], NULL, call_threaded_matrix_determinant, (void *) (dt + i));
+				pthread_create(&threads[i], NULL, threaded_matrix_determinant, (void *) (dt + i));
 			}
-
+			
+			
 			// Killing called threads for threaded matrix determinant
 			for (int i = 0; i < nthreads; i++)
 			{
 				pthread_join(threads[i], NULL);
 			}
+			
 			free(dt);
 			free(threads);
 
+			
+			
+			matrix_print(A);
+			printf("\n");
+			matrix_print(L);
+			printf("\n");
+			matrix_print(U);
+			printf("\n");
+			printf("DET-L = %lf\n", detL);
+			printf("DET-U = %lf\n", detU);
 			printf("\nDeterminant result: %lf\n", det);
 		}
 
@@ -353,8 +394,6 @@ int main(int argc, char **argv)
 			free(threads);
 
 			(equal)? printf("\nMatrices are equal\n") : printf("\nMatrices are not equal\n");
-		}else{
-			printf("\nMatrices (rows/cols) are not equal\n");
 		}
 
 		// Free used matrices

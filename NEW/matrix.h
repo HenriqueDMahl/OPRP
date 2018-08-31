@@ -6,7 +6,9 @@
 #include <stdlib.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <stdbool.h>
 
+#define DELTA 0.000001
 #define random() ((rand() ^ rand()) / (RAND_MAX + 1.0))
 
 typedef struct {
@@ -43,7 +45,7 @@ matrix_t *matrix_inversion(matrix_t *A, matrix_t *(*p) (int, int), void (*p2) (m
 
 matrix_t *matrix_transpose(matrix_t *A, matrix_t *(*p) (int, int));
 
-double matrix_determinant(matrix_t* matrix, matrix_t *(*p) (int,int));
+double matrix_determinant(size_t mx_sz, double **m);
 
 void matrix_print(matrix_t *m);
 

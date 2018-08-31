@@ -88,44 +88,46 @@ int main(int argc, char **argv)
 
 	if(execThr)
 	{
-		// Threadned matrix functions
+		// Threaded matrix functions
 		start_time = wtime();
 
 		// Matrices initialization
 		matrix_t *A = matrix_create_block(nrows1,ncols1); freeLaterA = 1;
 		matrix_t *B = matrix_create_block(nrows2,ncols2); freeLaterB = 1;
 		// If A and B are multiplicative then R shall support its result
-		matrix_t *R = (ncols1 == nrows2)? matrix_create_block(nrows1,ncols2) : matrix_create_block(nrows1,ncols1); freeLaterR = 1;
+		matrix_t *R =  (ncols1 == nrows2)? matrix_create_block(nrows1,ncols2) : matrix_create_block(nrows1,ncols1); freeLaterR = 1;
 		// If A has nrows != ncols then
 		matrix_t *Rt = (ncols1 == nrows1)? matrix_create_block(nrows1,ncols1) : matrix_create_block(ncols1,nrows1); freeLaterRt = 1;
 
 		// Fill randomically the matrices
-	//	matrix_randfill(A);
-	//	matrix_randfill(B);
+		matrix_randfill(A);
+		matrix_randfill(B);
 
-		   A->data[0][0] = 2;
-		   A->data[0][1] = 1;
-		   A->data[0][2] = 2;
+/*
+		A->data[0][0] = 2;
+		A->data[0][1] = 1;
+		A->data[0][2] = 2;
 
-		   A->data[1][0] = 1;
-		   A->data[1][1] = 2;
-		   A->data[1][2] = 1;
+		A->data[1][0] = 1;
+		A->data[1][1] = 2;
+		A->data[1][2] = 1;
 
-		   A->data[2][0] = 1;
-		   A->data[2][1] = 9;
-		   A->data[2][2] = 2;
+		A->data[2][0] = 1;
+		A->data[2][1] = 9;
+		A->data[2][2] = 2;
 
-	 		   B->data[0][0] = 2;
-	 		   B->data[0][1] = 1;
-	 		   B->data[0][2] = 2;
+		B->data[0][0] = 2;
+		B->data[0][1] = 1;
+		B->data[0][2] = 2;
 
-	 		   B->data[1][0] = 1;
-	 		   B->data[1][1] = 2;
-	 		   B->data[1][2] = 1;
+		B->data[1][0] = 1;
+		B->data[1][1] = 2;
+		B->data[1][2] = 1;
 
-	 		   B->data[2][0] = 1;
-	 		   B->data[2][1] = 9;
-	 		   B->data[2][2] = 2;
+		B->data[2][0] = 1;
+		B->data[2][1] = 9;
+		B->data[2][2] = 2;
+*/
 
 		if(mode2Debug)
 		{
@@ -138,7 +140,7 @@ int main(int argc, char **argv)
 
 			printf("Thread number = %d\n", nthreads);
 		}
-		// Threadned function execution control
+		// Threaded function execution control
 		if(calcSum)
 		{//Threaded matrix sum
 
@@ -161,7 +163,7 @@ int main(int argc, char **argv)
 					dt[i].lastThread     = nthreads-1;
 					dt[i].flagRows       = flagRows;
 					dt[i].debug          = mode2Debug;
-					dt[i].resto					 = resto;
+					dt[i].resto          = resto;
 					dt[i].A              = A;
 					dt[i].B              = B;
 					dt[i].R              = R;
@@ -201,12 +203,11 @@ int main(int argc, char **argv)
 				dt[i].lastThread     = nthreads-1;
 				dt[i].flagRows       = flagRows;
 				dt[i].debug          = mode2Debug;
-				dt[i].resto					 = resto;
+				dt[i].resto          = resto;
 				dt[i].A              = A;
 				dt[i].B              = B;
 				dt[i].R              = R;
 				dt[i].det            = 0;
-				//TODO how to check what each thread is doing to verify whether its working or not?
 				pthread_create(&threads[i], NULL, threaded_matrix_multiply, (void *) (dt + i));
 			}
 
@@ -269,11 +270,10 @@ int main(int argc, char **argv)
 				dt[i].lastThread     = nthreads-1;
 				dt[i].flagRows       = flagRows;
 				dt[i].debug          = mode2Debug;
-				dt[i].resto			 = resto;
+				dt[i].resto          = resto;
 				dt[i].A              = A;
 				dt[i].Rt             = Rt;
 				dt[i].det            = 0;
-				//TODO correct transpose matrix calc for non-symmetric matrix
 				pthread_create(&threads[i], NULL, threaded_matrix_transpose, (void *) (dt + i));
 			}
 
@@ -335,13 +335,12 @@ int main(int argc, char **argv)
 				dt[i].lastThread     = nthreads-1;
 				dt[i].flagRows       = flagRows;
 				dt[i].debug          = mode2Debug;
-				dt[i].resto			 = resto;
+				dt[i].resto          = resto;
 				dt[i].A              = A;
 				dt[i].B              = B;
 				dt[i].R              = R;
-				dt[i].equal 		 = &equal;
+				dt[i].equal          = &equal;
 				dt[i].det            = 0;
-				//TODO implement a synchronization point between threads???
 				pthread_create(&threads[i], NULL, threaded_matrix_equal, (void *) (dt + i));
 			}
 
@@ -385,21 +384,29 @@ int main(int argc, char **argv)
 		// If A has nrows != ncols then
 		matrix_t *Rt = (ncols1 == nrows1)? matrix_create_block(nrows1,ncols1) : matrix_create_block(ncols1,nrows1); freeLaterRt = 1;
 
-		matrix_randfill(A);
-		matrix_randfill(B);
-		/*
-		   A->data[0][0] = 2;
-		   A->data[0][1] = 1;
-		   A->data[0][2] = 2;
+		//matrix_randfill(A);
+		//matrix_randfill(B);
+		
+			A->data[0][0] = 1;
+			A->data[0][1] = 2;
+			A->data[0][2] = 3;
+			A->data[0][3] = 4;
 
-		   A->data[1][0] = 1;
-		   A->data[1][1] = 2;
-		   A->data[1][2] = 1;
+			A->data[1][0] = 4;
+			A->data[1][1] = 3;
+			A->data[1][2] = 2;
+			A->data[2][3] = 1;
 
-		   A->data[2][0] = 1;
-		   A->data[2][1] = 9;
-		   A->data[2][2] = 2;
-		   */
+			A->data[2][0] = 1;
+			A->data[2][1] = 2;
+			A->data[2][2] = 3;
+			A->data[2][3] = 4;
+
+			A->data[3][2] = 4;
+			A->data[3][0] = 3;
+			A->data[3][1] = 2;
+			A->data[3][3] = 1;
+
 		if(!execThr)
 		{
 			printf("Matrix A\n");
@@ -428,9 +435,10 @@ int main(int argc, char **argv)
 			matrix_print(R);
 		}
 
-		if(calcInv)
+		// There only exists inverse for symmetric matrices
+		if(calcInv && A->rows == B->rows && A->cols == A->rows)
 		{//Sequential matrix inversion
-			R = matrix_inversion(A,matrix_create_block_init, matrix_destroy_block);
+			R = matrix_inversion(A, matrix_create_block_init, matrix_destroy_block);
 
 			printf("\nInverse matrix R\n");
 			matrix_print(R);
@@ -444,9 +452,12 @@ int main(int argc, char **argv)
 			matrix_print(Rt);
 		}
 
-		if(calcDet)
+		// There only exists determinant for symmetric matrices
+		if(calcDet && A->rows == A->cols)
 		{//Sequential matrix determinant
-			det = matrix_determinant(A, matrix_create_block);
+		//	det = matrix_determinant2(A, matrix_create_block_init, matrix_destroy_block);
+
+		det = matrix_determinant(A->rows, A->data);
 
 			printf("\nDeterminant result: %lf\n", det);
 		}
@@ -457,9 +468,9 @@ int main(int argc, char **argv)
 		}
 
 		// Free used matrices
-		if (freeLaterA) matrix_destroy_block(A);
-		if (freeLaterB) matrix_destroy_block(B);
-		if (freeLaterR) matrix_destroy_block(R);
+		if (freeLaterA)  matrix_destroy_block(A);
+		if (freeLaterB)  matrix_destroy_block(B);
+		if (freeLaterR)  matrix_destroy_block(R);
 		if (freeLaterRt) matrix_destroy_block(Rt);
 
 		end_time = wtime();
@@ -470,8 +481,8 @@ int main(int argc, char **argv)
 	if(execBoth == 2)
 	{
 		printf("\n\nTime taken by:"
-				"\nThreaded functions executed: %lf"
-				"\nSequential functions executed: %lf\n", timeThreaded, timeSequential);
+		"\nThreaded functions executed: %lf"
+		"\nSequential functions executed: %lf\n", timeThreaded, timeSequential);
 	}
 
 	fflush(stdout);

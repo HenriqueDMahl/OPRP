@@ -4,8 +4,8 @@ TARGET=main
 OTHER_TARGETS=matrix
 
 # Matrix A dimensions
-Arows=3
-Acols=3
+Arows=4
+Acols=4
 
 # Matrix B dimensions-pthread
 Brows=3
@@ -18,11 +18,11 @@ nThreads=2
 # 0 executes only threaded
 # 1 executes only sequential
 # 2 executes both
-Mode=0
+Mode=1
 
 # Only when Mode=0 or 2 is selected (refers to the prints of threads' actions)
 # Activate debug mode
-Mode2Debug=1
+Mode2Debug=0
 
 # Function execution control
 # Select only one at a time
@@ -30,8 +30,8 @@ M_Summm=0
 M_Multi=0
 M_Inver=0
 M_Trasp=0
-M_Deter=0
-M_Equal=1
+M_Deter=1
+M_Equal=0
 
 all:
 	@$(clean) clear;

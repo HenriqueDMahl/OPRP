@@ -17,8 +17,6 @@ typedef struct {
 	matrix_t *A;
 	matrix_t *B;
 	matrix_t *R;
-	matrix_t *L;
-	matrix_t *U;
 	matrix_t *Rt;
 	matrix_t *(*p) (int,int);
 	void (*p2) (matrix_t*);

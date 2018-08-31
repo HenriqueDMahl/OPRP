@@ -116,16 +116,67 @@ void* threaded_matrix_transpose(void *arg)
 // Review how to split tasks between threads
 // Review how to split chunks between threads
 // Split as row vectors tasks per threads
-double threaded_matrix_determinant(matrix_t* matrix, matrix_t *(*p) (int,int), int debug)
-{
-}
 
-void* call_threaded_matrix_determinant(void *arg)
+void* threaded_matrix_determinant(void *arg)
 {
 	DadosThread *argRef = (DadosThread *) arg;
-
-	*argRef->det = threaded_matrix_determinant(argRef->A, matrix_create_block, argRef->debug);
-	printf("%lf \n", *argRef->det);
+	int newPos = 0;
+	
+    int i = 0, j = 0, k = 0;
+	
+	if(argRef->id == argRef->lastThread)
+	{
+		if(argRef->flagRows)
+		{
+			newPos = argRef->id*argRef->dataBlock_rows + argRef->dataBlock_rows + argRef->resto;
+		}else
+		{
+			newPos = argRef->id*argRef->dataBlock_rows + argRef->dataBlock_rows;
+		}
+	}else
+	{
+		newPos = (argRef->id*argRef->dataBlock_rows)+argRef->dataBlock_rows;
+	}
+	
+	//-------------------------------------------------------------
+	for (i = argRef->id*argRef->dataBlock_rows; i < newPos; i++)
+    {
+        for (j = 0; j < argRef->A->rows; j++)
+        {
+            if (j < i)
+                argRef->L->data[j][i] = 0;
+            else
+            {
+                argRef->L->data[j][i] = argRef->A->data[j][i];
+                for (k = 0; k < i; k++)
+                {
+                    argRef->L->data[j][i] = argRef->L->data[j][i] - argRef->L->data[j][k] * argRef->U->data[k][i];
+                }
+            }
+        }
+        for (j = 0; j < argRef->A->rows; j++)
+        {
+            if (j < i)
+                argRef->U->data[i][j] = 0;
+            else if (j == i)
+                argRef->U->data[i][j] = 1;
+            else
+            {
+                argRef->U->data[i][j] = argRef->A->data[i][j] / argRef->L->data[i][i];
+                for (k = 0; k < i; k++)
+                {
+                    argRef->U->data[i][j] = argRef->U->data[i][j] - ((argRef->L->data[i][k] * argRef->U->data[k][j]) / argRef->L->data[i][i]);
+                }
+            }
+        }
+    }
+    
+    for (i = argRef->id*argRef->dataBlock_rows; i < newPos; i++)
+    { 
+        *(argRef->detU) *= argRef->U->data[i][i];
+        *(argRef->detL) *= argRef->L->data[i][i];
+    }
+    printf("ID:%d DET = %lf\n",argRef->id,*(argRef->det));
 
 
 	pthread_exit(NULL);

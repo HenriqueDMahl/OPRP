@@ -1,22 +1,13 @@
-# GNU Makefile
 
-CC = gcc 
-CCFLAGS = -Wall 
-LDFLAGS = 
-TARGET = main
+CXXFLAGS=-O3 -std=c++11 -Wall -fopenmp
+RM=rm -f
+EXEC=mandelbrot
 
-%.o: %.c
-	$(CC) $(CCFLAGS) -c $<
+all: $(EXEC)
 
-%: %.o
-	$(CC) $(LDFLAGS) $^ -o $@ 
-
-all: $(TARGET)
-
-# Dependencias
-
-main: matrix.o main.c
-matrix.o: matrix.c matrix.h
+$(EXEC):
+	$(CXX) $(CXXFLAGS) $(EXEC).cpp -c -o $(EXEC).o
+	$(CXX) $(CXXFLAGS) $(EXEC).o -o $(EXEC)
 
 clean:
-	rm -f *.o *~ $(TARGET)
+	$(RM) $(EXEC).o $(EXEC)

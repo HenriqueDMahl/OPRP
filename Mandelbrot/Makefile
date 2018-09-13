@@ -1,5 +1,5 @@
 
-CXXFLAGS=-O3 -std=c++11 -Wall -fopenmp
+CXXFLAGS=-Ofast -std=c++11 -Wall -fopenmp
 RM=rm -f
 EXEC=mandelbrot
 

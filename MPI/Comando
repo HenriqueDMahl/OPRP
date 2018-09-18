@@ -1,0 +1,1 @@
+mpirun -machinefile maquinas.txt  -np 100 teste

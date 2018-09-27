@@ -1,0 +1,6 @@
+Rank 0 matrix after communication:
+0 0 0 0 
+0 1 2 0 
+0 3 1 4 
+0 6 5 4 
+

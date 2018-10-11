@@ -13,6 +13,15 @@ __global__ void soma(float *a, float *b, float *c){
 		c[id] = a[id] + b[id];
 }
 
+__global__ void sub(float *a, float *b, float *c){
+	int x = blockIdx.x * blockDim.x + threadIdx.x, y = blockIdx.y * blockDim.y + threadIdx.y;
+	// Identifies the index of the operation(vector)
+	int id = TAM*y + x;
+	// Performs the sum
+	if(id < TAM*TAM)
+		c[id] = a[id] - b[id];
+}
+
 __global__ void vector_add(int *a, int *b, int *c) {
 	int index = blockIdx.x * blockDim.x + threadIdx.x;
 	if(index < N) c[index] = a[index] + b[index];

@@ -1,5 +1,5 @@
-main:
-    nvcc vector.cu;
-    ./a.out;
+all:
+	nvcc vector.cu;
+	./a.out;
 clean:
-    rm a.out;
+	rm a.out;

@@ -62,7 +62,7 @@ int main() {
 	cudaMemcpy( d_b, b, size, cudaMemcpyHostToDevice );
 
 	//soma<<< (N + ceil(THREADS_PER_BLOCK-1)) / THREADS_PER_BLOCK, THREADS_PER_BLOCK >>>( d_a, d_b, d_c );
-	dim3 dimBlock (TAM + (int)ceil(TAM*TAM/N));
+	dim3 dimBlock ((int)ceil(TAM*TAM/(float)N));
     dim3 dimGrid (32,32);
 	soma<<< dimBlock,dimGrid >>> ( d_a, d_b, d_c );
 	cudaMemcpy( c, d_c, size, cudaMemcpyDeviceToHost );

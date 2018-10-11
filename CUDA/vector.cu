@@ -1,11 +1,20 @@
 #include <stdio.h>
-__global__ void vector_add(int *a, int *b, int *c) {
-	int index = blockIdx.x * blockDim.x + threadIdx.x;
-	c[index] = a[index] + b[index];
-}
-
 #define N (2048*2048)
 #define THREADS_PER_BLOCK 512
+
+__global__ void soma(float *a, float *b, float *c){
+	int x = threadIdx.x; int y = threadIdx.y;
+	// Identifies the index of the operation(vector)
+	int id = blockIdx.x + x + y;
+	// Performs the sum
+	c[id] = a[id] + b[id];
+}
+
+__global__ void vector_add(int *a, int *b, int *c) {
+	int index = blockIdx.x * blockDim.x + threadIdx.x;
+	if(index < N) c[index] = a[index] + b[index];
+}
+
 int main() {
 	int *a, *b, *c;
 	int *d_a, *d_b, *d_c;
@@ -22,8 +31,7 @@ int main() {
 	}
 	cudaMemcpy( d_a, a, size, cudaMemcpyHostToDevice );
 	cudaMemcpy( d_b, b, size, cudaMemcpyHostToDevice );
-    	vector_add<<<1, THREADS_PER_BLOCK>>>(d_a, d_b, d_c);
-//	vector_add<<< (N + (THREADS_PER_BLOCK-1)) / THREADS_PER_BLOCK, THREADS_PER_BLOCK >>>( d_a, d_b, d_c );
+	vector_add<<< (N + (THREADS_PER_BLOCK-1)) / THREADS_PER_BLOCK, THREADS_PER_BLOCK >>>( d_a, d_b, d_c );
 	cudaMemcpy( c, d_c, size, cudaMemcpyDeviceToHost );
 	printf( "c[0] = %d\n",c[0] );
 	printf( "c[%d] = %d\n",N-1, c[N-1] );

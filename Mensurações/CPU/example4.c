@@ -3,9 +3,9 @@
 #include <sys/time.h>
 #include <omp.h>
 
-#define NRA 1024                 /* number of rows in matrix A */
-#define NCA 1024                 /* number of columns in matrix A */
-#define NCB 1024                  /* number of columns in matrix B */
+#define NRA 2048                 /* number of rows in matrix A */
+#define NCA 2048                 /* number of columns in matrix A */
+#define NCB 2048                  /* number of columns in matrix B */
 
 double wtime()
 {
@@ -19,21 +19,22 @@ int main (int argc, char *argv[])
 	double start_time, end_time;
 	int  i, j, k;
 
-	float* a = malloc(sizeof(float)*1024);
-	for(i = 0; i < 1024; i++){
-		a[i] = malloc(sizeof(float)*1024);
+	float** a = malloc(sizeof(float*)*NRA);
+
+	for(i = 0; i < NRA; i++){
+		a[i] = malloc(sizeof(float)*NRA);
 	}
 
 
-	float* b = malloc(sizeof(float)*1024);
-	for(i = 0; i < 1024; i++){
-		b[i] = malloc(sizeof(float)*1024);
+	float** b = malloc(sizeof(float*)*NRA);
+	for(i = 0; i < NRA; i++){
+		b[i] = malloc(sizeof(float)*NRA);
 	}
 
 
-	float* c = malloc(sizeof(float)*1024);
-	for(i = 0; i < 1024; i++){
-		c[i] = malloc(sizeof(float)*1024);
+	float** c = malloc(sizeof(float*)*NRA);
+	for(i = 0; i < NRA; i++){
+		c[i] = malloc(sizeof(float)*NRA);
 	}
 
 	/*

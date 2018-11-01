@@ -67,12 +67,12 @@ int main(int argc, char **argv)
 		}
 
 		for (int i = 1; i <= filhos; i++){
-					MPI_Recv(&T, size*chunk, MPI_FLOAT, i, tag, MPI_COMM_WORLD, &status);
-					for(int i = 0; i < i*chunk + chunk; i++){
-						for(int j = 0; j < size; j++){
-							G[i][j] = T[i][j];
-						}
-					}
+			MPI_Recv(&T, size*chunk, MPI_FLOAT, i, tag, MPI_COMM_WORLD, &status);
+			for(int i = 0; i < i*chunk + chunk; i++){
+				for(int j = 0; j < size; j++){
+					G[i][j] = T[i][j];
+				}
+			}
 		}
 		/*
 		for (int i = 0; i < size; i++)
